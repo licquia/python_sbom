@@ -1,5 +1,8 @@
-.PHONY: clean clean-test clean-pyc clean-build docs help
+.PHONY: clean clean-test clean-pyc clean-build clean-venv docs help
 .DEFAULT_GOAL := help
+
+PATH := .venv/bin:$(PATH)
+export PATH
 
 define BROWSER_PYSCRIPT
 import os, webbrowser, sys
@@ -26,7 +29,7 @@ BROWSER := python -c "$$BROWSER_PYSCRIPT"
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
-clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
+clean: clean-build clean-pyc clean-test clean-venv
 
 clean-build: ## remove build artifacts
 	rm -fr build/
@@ -47,22 +50,31 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
-lint: ## check style with flake8
+clean-venv: ## remove virtualenv artifacts
+	rm -fr .venv
+
+venv: .venv
+
+.venv:
+	python3 -m venv .venv
+	.venv/bin/pip install -r requirements_dev.txt
+
+lint: .venv ## check style with flake8
 	flake8 python_sbom tests
 
-test: ## run tests quickly with the default Python
+test: .venv ## run tests quickly with the default Python
 	pytest
 
-test-all: ## run tests on every Python version with tox
+test-all: .venv ## run tests on every Python version with tox
 	tox
 
-coverage: ## check code coverage quickly with the default Python
+coverage: .venv ## check code coverage quickly with the default Python
 	coverage run --source python_sbom -m pytest
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
-docs: ## generate Sphinx HTML documentation, including API docs
+docs: .venv ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/python_sbom.rst
 	rm -f docs/modules.rst
 	sphinx-apidoc -o docs/ python_sbom
@@ -76,10 +88,10 @@ servedocs: docs ## compile the docs watching for changes
 release: dist ## package and upload a release
 	twine upload dist/*
 
-dist: clean ## builds source and wheel package
+dist: clean .venv ## builds source and wheel package
 	python setup.py sdist
 	python setup.py bdist_wheel
 	ls -l dist
 
-install: clean ## install the package to the active Python's site-packages
+install: clean .venv ## install the package to the active Python's site-packages
 	python setup.py install
