@@ -29,7 +29,7 @@ BROWSER := python -c "$$BROWSER_PYSCRIPT"
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
-clean: clean-build clean-pyc clean-test clean-venv
+clean: clean-venv clean-build clean-pyc clean-test clean-docs
 
 clean-build: ## remove build artifacts
 	rm -fr build/
@@ -50,6 +50,10 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
+clean-docs: ## remove docs artifacts
+	rm -f docs/python_sbom.rst
+	rm -f docs/modules.rst
+
 clean-venv: ## remove virtualenv artifacts
 	rm -fr .venv
 
@@ -58,6 +62,7 @@ venv: .venv
 .venv:
 	python3 -m venv .venv
 	.venv/bin/pip install -r requirements_dev.txt
+	.venv/bin/python setup.py develop
 
 lint: .venv ## check style with flake8
 	flake8 python_sbom tests

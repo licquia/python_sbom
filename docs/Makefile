@@ -1,6 +1,9 @@
 # Minimal makefile for Sphinx documentation
 #
 
+PATH := ../.venv/bin:$(PATH)
+export PATH
+
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
