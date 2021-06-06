@@ -2,13 +2,15 @@
 import sys
 import click
 
+from python_sbom.api import generate
+
 
 @click.command()
-def main(args=None):
+@click.argument('project_name')
+def main(project_name):
     """Console script for python_sbom."""
-    click.echo("Replace this message by putting your code into "
-               "python_sbom.cli.main")
-    click.echo("See click documentation at https://click.palletsprojects.com/")
+
+    sys.stdout.write(generate(project_name))
     return 0
 
 

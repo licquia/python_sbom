@@ -62,6 +62,7 @@ venv: .venv
 .venv:
 	python3 -m venv .venv
 	.venv/bin/pip install -r requirements_dev.txt
+	.venv/bin/pip install git+https://github.com/licquia/tools-python.git@unified#egg=spdx-tools
 	.venv/bin/python setup.py develop
 
 lint: .venv ## check style with flake8
