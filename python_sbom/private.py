@@ -59,11 +59,12 @@ def get_module_info_from_pypi(module_name, module_cache):
     if parsed is not None:
         module_info = module_cache[module_name]
         release_info = parsed['releases'][module_info['version']]
-        sdist_info = [x for x in release_info
-                      if x['packagetype'] == 'sdist'][0]
+        sdist = [x for x in release_info
+                      if x['packagetype'] == 'sdist']
+        sdist_info = sdist[0] if len(sdist) > 0 else {}
         for field in ['url', 'digests', 'size', 'filename']:
             if field not in module_info:
-                module_info[field] = sdist_info[field]
+                module_info[field] = sdist_info.get(field)
 
 
 def get_module_info(module_name, module_cache={}):
