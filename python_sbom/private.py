@@ -99,13 +99,13 @@ def get_module_info(module_name, module_cache={}):
 def spdx_document(toplevel_module_name, module_info):
     d = spdx.document.Document()
     d.namespace = f'http://spdx.org/spdxpackages/' \
-        f'{toplevel_module_name}-{module_info["version"]}'
+        f'{toplevel_module_name}-{module_info.get("version")}'
     d.spdx_id = 'SPDXRef-DOCUMENT'
-    d.name = f'{toplevel_module_name}-{module_info["version"]}'
+    d.name = f'{toplevel_module_name}-{module_info.get("version")}'
     d.version = spdx.version.Version(2, 2)
     d.data_license = spdx.document.License.from_identifier('CC0-1.0')
     d.creation_info.add_creator(spdx.creationinfo.Person(
-        module_info['author']['name'], module_info['author']['email']
+        module_info.get('author', {}).get('name'), module_info.get('author').get('email')
     ))
     d.creation_info.set_created_now()
 
