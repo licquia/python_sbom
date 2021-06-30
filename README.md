@@ -6,13 +6,13 @@ No hassle, no fancy features, just get the job done.
 ## Installation
 
 At the moment, python_sbom is not in PyPI, which means you'll have to
-install it via pip manually.  Compounding this, it uses an enhanced
-version of spdx-tools, which you'll need to also install manually.  In
+install it via pip manually.  Additionally, we use a prerelease
+version of spdx-tools, which also requires manual installation.  In
 the future, we hope to get both problems fixed.
 
 Until then, use pip to get what you need:
 
-    pip install git+https://github.com/licquia/tools-python.git@unified#egg=spdx-tools
+    pip install git+https://github.com/spdx/tools-python.git#egg=spdx-tools
     pip install git+https://github.com/licquia/python_sbom.git#egg=python_sbom
 
 Do this in your build environment, using your build tool of choice
