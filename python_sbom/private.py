@@ -116,7 +116,7 @@ def spdx_from_module(module_name, module_info):
     if 'version' not in module_info or 'seen' in module_info:
         return None
     p = spdx.package.Package()
-    p.spdx_id = f'SPDXREF-Package-{module_name}'
+    p.spdx_id = f'SPDXRef-Package-{module_name}'
     p.name = module_name
     p.version = module_info['version']
     if module_info['license'] == 'NOASSERTION':
@@ -142,7 +142,7 @@ def spdx_from_module_deps(module_name, module_cache):
     for dep in module_info['requires']:
         pkg = spdx_from_module(dep, module_cache[dep])
         if pkg is not None:
-            rel_desc = f'SPDXREF-Package-{module_name} DEPENDS_ON SPDXRef-Package-{dep}'
+            rel_desc = f'SPDXRef-Package-{module_name} DEPENDS_ON SPDXRef-Package-{dep}'
             rel = spdx.relationship.Relationship(rel_desc)
             yield (pkg, rel)
             for (subpkg, subrel) in spdx_from_module_deps(dep, module_cache):
