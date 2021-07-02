@@ -10,8 +10,12 @@ from python_sbom.api import generate
 def main(project_name):
     """Console script for python_sbom."""
 
-    sys.stdout.write(generate(project_name))
-    return 0
+    try:
+        sys.stdout.write(generate(project_name))
+        return 0
+    except ValueError as e:
+        sys.stderr.write(f'error: could not generate: {str(e)}\n')
+        return 1
 
 
 if __name__ == "__main__":

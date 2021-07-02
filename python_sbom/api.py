@@ -12,6 +12,9 @@ def generate(toplevel_package_name):
     SPDX software bill of materials."""
 
     module_info = private.get_module_info(toplevel_package_name)
+    if not module_info[toplevel_package_name]:
+        raise ValueError('toplevel module not found')
+
     module_doc = private.spdx_document(toplevel_package_name,
                                        module_info[toplevel_package_name])
     pkg = private.spdx_from_module(toplevel_package_name,

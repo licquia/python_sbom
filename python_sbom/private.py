@@ -1,11 +1,10 @@
 """Internals for python_sbom.  This code does not have a stable API; use the
 code in python_sbom.api (or just python_sbom) instead."""
 
-from importlib.metadata import metadata
-import sys
 import os
 import re
 import json
+import hashlib
 import urllib.request
 import urllib.error
 
@@ -24,13 +23,12 @@ try:
 except ModuleNotFoundError:
     import importlib_metadata
 
+
 def get_checksum_from_module_info(module_info):
-    import hashlib  # noqa
-    
     result = hashlib.sha1(module_info['name'].encode())
     checksum = spdx.checksum.Algorithm(identifier='SHA1',
                                        value=result.hexdigest())
-    # Todo ... 
+    # Todo ...
     # when spdx starts the support more algorithm enable below code
     # if 'digests' in module_info:
     #     checksum.identifier = 'SHA256'
@@ -41,7 +39,8 @@ def get_checksum_from_module_info(module_info):
 
 def get_supplier_from_module_info(module_info):
     AuthorAnOrganizationKeywords = [
-        "authority", "team", "developers", "services", "foundation", "software"]
+        "authority", "team", "developers", "services", "foundation", "software"
+    ]
 
     def check_supplier_is_organization(supplier):
         for key in AuthorAnOrganizationKeywords:
@@ -95,20 +94,20 @@ def get_module_info_from_pypi(module_name, module_cache):
                 'name': parsed['info']['maintainer'],
                 'email': parsed['info']['maintainer_email']
             }
-        
+
         if 'package_url' not in module_cache[module_name]:
             module_cache[module_name]['package_url'] = \
                 parsed['info']['package_url']
-        
+
         if 'release_url' not in module_cache[module_name]:
             module_cache[module_name]['release_url'] = \
                 "{0}/{1}".format(module_cache[module_name]['package_url'],
                                  module_cache[module_name]['version'])
 
         if 'project_url' not in module_cache[module_name]:
-                module_cache[module_name]['project_url'] = \
-                    parsed['info']['project_url']
-                    
+            module_cache[module_name]['project_url'] = \
+                parsed['info']['project_url']
+
         if 'home_page' not in module_cache[module_name]:
             module_cache[module_name]['home_page'] = \
                 parsed['info']['home_page']
@@ -118,8 +117,7 @@ def get_module_info_from_pypi(module_name, module_cache):
 
         module_info = module_cache[module_name]
         release_info = parsed['releases'][module_info['version']]
-        sdist = [x for x in release_info 
-                 if x['packagetype'] == 'sdist']
+        sdist = [x for x in release_info if x['packagetype'] == 'sdist']
         sdist_info = sdist[0] if len(sdist) > 0 else {}
         for field in ['url', 'digests', 'size', 'filename']:
             if field not in module_info:
@@ -132,7 +130,6 @@ def get_module_info(module_name, module_cache={}):
     module_cache[module_name] = {}
     try:
         dist = importlib_metadata.distribution(module_name)
-        metadata = importlib_metadata.metadata(module_name)
     except importlib_metadata.PackageNotFoundError:
         dist = None
     if dist is not None:
@@ -144,7 +141,7 @@ def get_module_info(module_name, module_cache={}):
             'name': dist.metadata['Author'],
             'email': dist.metadata['Author-email']
         }
-        module_cache[module_name]['home_page'] = metadata['Home-page']
+        module_cache[module_name]['home_page'] = dist.metadata['Home-page']
         get_module_info_from_pypi(module_name, module_cache)
         if dist.requires is None:
             dep_names = []
@@ -167,8 +164,8 @@ def spdx_document(toplevel_module_name, module_info):
     d.version = spdx.version.Version(2, 2)
     d.data_license = spdx.document.License.from_identifier('CC0-1.0')
     d.creation_info.add_creator(spdx.creationinfo.Person(
-        module_info.get('author', {}).get('name'), 
-        module_info.get('author').get('email')
+        module_info.get('author', {}).get('name'),
+        module_info.get('author', {}).get('email')
     ))
     d.creation_info.set_created_now()
 
@@ -191,9 +188,9 @@ def spdx_from_module(module_name, module_info):
     p.licenses_from_files = [spdx.utils.NoAssert()]
     p.cr_text = spdx.utils.NoAssert()
 
-    if 'url' in module_info:
+    if module_info.get('url', None) is not None:
         p.download_location = module_info['url']
-    elif 'home_page' in module_info:
+    elif module_info.get('home_page', None) is not None:
         p.download_location = module_info['home_page']
     else:
         p.download_location = spdx.utils.NoAssert()
@@ -203,7 +200,7 @@ def spdx_from_module(module_name, module_info):
     p.supplier = get_supplier_from_module_info(module_info)
 
     module_info['seen'] = True
-    
+
     p.homepage = module_info['home_page']
 
     p.check_sum = get_checksum_from_module_info(module_info)
