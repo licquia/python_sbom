@@ -24,6 +24,11 @@ except ModuleNotFoundError:
     import importlib_metadata
 
 
+def get_tool_version():
+    import python_sbom  # noqa
+    return python_sbom.__version__
+
+
 def get_checksum_from_module_info(module_info):
     result = hashlib.sha1(module_info['name'].encode())
     checksum = spdx.checksum.Algorithm(identifier='SHA1',
@@ -163,9 +168,8 @@ def spdx_document(toplevel_module_name, module_info):
     d.name = f'{toplevel_module_name}-{module_info.get("version")}'
     d.version = spdx.version.Version(2, 2)
     d.data_license = spdx.document.License.from_identifier('CC0-1.0')
-    d.creation_info.add_creator(spdx.creationinfo.Person(
-        module_info.get('author', {}).get('name'),
-        module_info.get('author', {}).get('email')
+    d.creation_info.add_creator(spdx.creationinfo.Tool(
+        'python_sbom ' + get_tool_version()
     ))
     d.creation_info.set_created_now()
 
